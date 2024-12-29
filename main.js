@@ -232,7 +232,7 @@ class Proxmox extends utils.Adapter {
 
                     try {
                         const nodes = await this.proxmox.getNodes();
-                        this.log.debug(`Nodes: ${JSON.stringify(nodes)}`);
+                        this.log.debug(`[sendRequest] Nodes: ${JSON.stringify(nodes)}`);
                         await this.setNodes(nodes);
                     } catch (e) {
                         this.log.warn(`Cannot send request: ${e}`);
@@ -478,11 +478,13 @@ class Proxmox extends utils.Adapter {
                                 }else{
                                     this.log.debug(`[createNodes] disk ${disk.devpath} get model for node ${node.node} undefined`);
                                 }
-                                const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                                this.log.debug(`[createNodes] resolve getNodeDisksSmart => JSON.stringify(nodeDiskSmart.data)`);
-                                //if (nodeDiskSmart?.data?.text) {
-                                if (nodeDiskSmart.data !== undefined) {
-                                    await this.createCustomState(sid, `${diskPath}.smart`, 'text', JSON.stringify(nodeDiskSmart.data.attributes));
+                                if (disk.health !== 'UNKNOWN') {
+                                    const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
+                                    this.log.debug(`[createNodes] resolve getNodeDisksSmart => JSON.stringify(nodeDiskSmart.data)`);
+                                    //if (nodeDiskSmart?.data?.text) {
+                                    if (nodeDiskSmart.data !== undefined) {
+                                        await this.createCustomState(sid, `${diskPath}.smart`, 'text', JSON.stringify(nodeDiskSmart.data.attributes));
+                                    }
                                 }
                             }
                         }
@@ -1108,16 +1110,18 @@ class Proxmox extends utils.Adapter {
                                         ack: true,
                                     });
                                 }
-
-                                const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
-                                this.log.debug(`[setnodes] getNodeDisksSmart from ${disk.devpath} => ${JSON.stringify(nodeDiskSmart.data)}`);
-                                // if (nodeDiskSmart?.data?.text) {
-                                if (nodeDiskSmart.data !== undefined){
-                                    await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, {
+                                if (disk.health !== 'UNKNOWN') {
+                                    const nodeDiskSmart = await this.proxmox?.getNodeDisksSmart(node.node, disk.devpath);
+                                    this.log.debug(`[setnodes] getNodeDisksSmart from ${disk.devpath} => ${JSON.stringify(nodeDiskSmart.data)}`);
+                                    // if (nodeDiskSmart?.data?.text) {
+                                    if (nodeDiskSmart.data !== undefined){
+                                        await this.setStateChangedAsync(`${sid}.${diskPath}.smart`, {
                                         // val: nodeDiskSmart.data.text,
-                                        val: JSON.stringify(nodeDiskSmart.data.attributes),
-                                        ack: true,
-                                    });
+                                            val: JSON.stringify(nodeDiskSmart.data.attributes),
+                                            ack: true,
+                                        });
+
+                                    }
                                 }
                             }
                         }
