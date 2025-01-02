@@ -434,6 +434,12 @@ class Proxmox extends utils.Adapter {
                             await this.createCustomState(sid, 'swap.used_lev', 'level', p(nodeStatus.swap.used, nodeStatus.swap.total));
                         }
                     }
+
+                    const nodeVersion = await this.proxmox?.getNodeVersion(node.node);
+                    if (nodeVersion) {
+                        await this.createCustomState(sid, 'version', 'text', nodeVersion.version);
+                    }
+
                 } catch (err) {
                     this.log.warn(`[createNodes] Unable to get status of node ${node.node}: ${err}`);
                 }
