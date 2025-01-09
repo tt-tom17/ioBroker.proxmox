@@ -163,6 +163,7 @@
         "docs/de/README.md"
       ]
     },
+    "restartAdapters": [],
     "dependencies": [
       {
         "js-controller": ">=5.0.19"
