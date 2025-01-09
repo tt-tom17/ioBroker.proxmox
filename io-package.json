@@ -128,7 +128,8 @@
       "Matthias Kleine <info@haus-automatisierung.com>"
     ],
     "platform": "Javascript/Node.js",
-    "mode": "daemon",
+    "mode": "schedule",
+    "schedule": "*/10 * * * * *",
     "icon": "proxmox.png",
     "compact": true,
     "localLinks": {

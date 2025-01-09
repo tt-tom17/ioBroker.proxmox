@@ -59,10 +59,10 @@ class Proxmox extends utils.Adapter {
         // this.config.requestInterval ist schon vom typ number
         //this.config.requestInterval = parseInt(this.config.requestInterval, 10) || 30;
 
-        if (this.config.requestInterval < 5) {
+        /* if (this.config.requestInterval < 5) {
             this.log.info('Intervall configured < 5s, setting to 5s');
             this.config.requestInterval = 5;
-        }
+        } */
 
         try {
             // Get a new ticket (login)
@@ -73,9 +73,26 @@ class Proxmox extends utils.Adapter {
                 // subscribe on all state changes
                 await this.subscribeStatesAsync('*');
 
-                this.sendRequest(); // start interval
+                //this.sendRequest(); // start interval
 
                 await this.setState('info.connection', { val: true, ack: true });
+
+                if (this.proxmox) {
+                    this.setState('info.lastUpdate', { val: Date.now(), ack: true });
+                    this.log.debug('Abfage gestartet');
+                    this.proxmox.resetResponseCache(); // Clear cache to start fresh
+                    try {
+                        const nodes = await this.proxmox.getNodes();
+                        this.log.debug(`[sendRequest] Nodes: ${JSON.stringify(nodes)}`);
+                        await this.setNodes(nodes);
+                        this.end();
+                    } catch (e) {
+                        this.log.warn(`Cannot send request: ${e}`);
+                        this.setState('info.connection', { val: false, ack: true });
+                        this.end();
+                    }
+                }
+
             });
         } catch (err) {
             await this.setState('info.connection', { val: false, ack: true });
@@ -216,7 +233,7 @@ class Proxmox extends utils.Adapter {
         }
     }
 
-    sendRequest(nextRunTimeout) {
+    /*sendRequest(nextRunTimeout) {
         this.setState('info.lastUpdate', { val: Date.now(), ack: true });
 
         if (this.clearTimeout) {
@@ -243,7 +260,7 @@ class Proxmox extends utils.Adapter {
                 this.sendRequest();
             }, nextRunTimeout || this.config.requestInterval * 1000,
         );
-    }
+    } */
 
     async getNodes() {
         try {
@@ -1491,11 +1508,16 @@ class Proxmox extends utils.Adapter {
     prepareNameForId(val) {
         return String(val).replace('.', '-');
     }
-
+    end() {
+        if (this.unloaded) return;
+        this.log.info('stopping adapter');
+        this.stop();
+    }
     /**
      * @param {() => void} callback
      */
     onUnload(callback) {
+        this.unloaded = true;
         try {
             this.proxmox && this.proxmox.stop();
 
