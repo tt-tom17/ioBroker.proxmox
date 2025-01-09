@@ -129,7 +129,7 @@
     ],
     "platform": "Javascript/Node.js",
     "mode": "schedule",
-    "schedule": "*/10 * * * * *",
+    "schedule": " * * * * *",
     "icon": "proxmox.png",
     "compact": true,
     "localLinks": {
@@ -163,7 +163,6 @@
         "docs/de/README.md"
       ]
     },
-    "restartAdapters": [],
     "dependencies": [
       {
         "js-controller": ">=5.0.19"
