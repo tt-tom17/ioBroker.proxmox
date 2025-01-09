@@ -1523,7 +1523,7 @@ class Proxmox extends utils.Adapter {
     end() {
         if (this.unloaded) return;
         this.log.info('stopping adapter');
-        this.stop;
+        this.stop();
     }
     /**
      * @param {() => void} callback
