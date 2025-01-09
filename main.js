@@ -48,6 +48,18 @@ class Proxmox extends utils.Adapter {
     }
 
     async onReady() {
+        try {
+            const instObj = await this.getForeignObjectAsync(`system.adapter.${this.namespace}`);
+            if (instObj && instObj.common && instObj.common.schedule ) {
+                // instObj.common.schedule = `*/30 * * * * *`;
+                this.log.info(`Schedule is now: ${instObj.common.schedule}`);
+                //await this.setForeignObjectAsync(`system.adapter.${this.namespace}`, instObj);
+                //this.terminate ? this.terminate() : process.exit(0);
+                //return;
+            }
+        } catch (err) {
+            this.log.error(`Could not check or adjust the schedule: ${err.message}`);
+        }
         if (!this.config.ip || this.config.ip === '192.000.000.000') {
             this.log.error('Please set the IP of your Proxmox host.');
             typeof this.terminate === 'function' ? this.terminate(11) : process.exit(11);
@@ -1511,7 +1523,7 @@ class Proxmox extends utils.Adapter {
     end() {
         if (this.unloaded) return;
         this.log.info('stopping adapter');
-        this.stop();
+        this.stop;
     }
     /**
      * @param {() => void} callback

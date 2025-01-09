@@ -129,7 +129,7 @@
     ],
     "platform": "Javascript/Node.js",
     "mode": "schedule",
-    "schedule": " * * * * *",
+    "schedule": " */30 * * * * *",
     "icon": "proxmox.png",
     "compact": true,
     "localLinks": {
